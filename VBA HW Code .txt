@@ -1,0 +1,123 @@
+Sub VBA_Homework()
+'Introduce Variables
+Dim LastRow As Long
+Dim TotalStock As Double
+Dim YearOpen As Double
+Dim YearClose As Double
+Dim ResultsTable1Rows As Integer
+Dim ResultsTable2Rows As Integer
+Dim GreatestVol As Double
+Dim GreatestIncrease As Double
+Dim GreatestDecrease As Double
+
+'Loop Through Worksheets
+For Each ws In Worksheets
+
+    'Define LastRow
+    LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    'Insert Results Table 1 Headers
+    ws.Range("I1").Value = "Ticker "
+    ws.Range("J1").Value = "Yearly Change"
+    ws.Range("K1").Value = "Percent Change"
+    ws.Range("L1").Value = "Total Stock Volume"
+    
+    'Insert Result Table 2 Headers
+    ws.Range("O1").Value = "Ticker"
+    ws.Range("P1").Value = "Value"
+    ws.Range("N2").Value = "Greatest%Increase"
+    ws.Range("N3").Value = "Greatest%Decrease"
+    ws.Range("N4").Value = "Greatest Stock Vol"
+    
+    'Define ResultsTable1Rows
+    ResultsTable1Rows = 2
+    
+    'Loop through Ticker
+    For r = 2 To LastRow
+    
+        'Conditional: its the first of the year
+        If ws.Cells(r - 1, 1).Value <> ws.Cells(r, 1).Value Then
+            'Grab YearOpen
+            YearOpen = ws.Range("C" & r).Value
+            'Add TotalStock
+            TotalStock = TotalStock + ws.Range("G" & r).Value
+        
+        'Conditional: end of the year
+        ElseIf ws.Cells(r + 1, 1).Value <> ws.Cells(r, 1).Value Then
+            'Grab Year Close
+            YearClose = ws.Range("E" & r).Value
+            'Add TotalStock
+            TotalStock = TotalStock + ws.Range("G" & r).Value
+            'Insert Ticker in Results Table 1
+            ws.Range("I" & ResultsTable1Rows).Value = ws.Range("A" & r).Value
+            'Insert Yearly Change in Results Table 1
+            ws.Range("J" & ResultsTable1Rows).Value = YearClose - YearOpen
+            'Insert Percent Change in Results Table 1
+            ws.Range("K" & ResultsTable1Rows).Value = ws.Range("J" & ResultsTable1Rows).Value / YearOpen
+            'Insert Total Stock Volume in Result Table 1
+            ws.Range("L" & ResultsTable1Rows).Value = TotalStock
+            'Next Row in Results Table
+            ResultsTable1Rows = ResultsTable1Rows + 1
+            'Reset Total Stock
+            TotalStock = 0
+            'Reset Year Open
+            YearOpen = 0
+            'Reset Year Close
+            YearClose = 0
+        
+        'Conditional: mid year
+        Else
+        'Add TotalStock
+        TotalStock = TotalStock + ws.Range("G" & r).Value
+        
+        End If
+        
+    Next r
+    
+    'New Loop
+    For r = 2 To LastRow
+
+        'Conditional: Year Change is Positive
+        If ws.Range("J" & r).Value >= 0 Then
+        'Fill Interior Cell Green
+        ws.Range("J" & r).Interior.ColorIndex = 4
+        
+        'Conditional: Year Change is Negative
+        ElseIf ws.Range("J" & r).Value < 0 Then
+        'Fill Interior Cell Red
+        ws.Range("J" & r).Interior.ColorIndex = 3
+        
+        Else: End If
+    Next r
+            
+    'New Loop
+    For r = 2 To LastRow
+        'Conditional: Percent Increases
+        If ws.Range("K" & r).Value > ws.Range("K" & (r + 1)).Value Then
+        'Insert Ticker in Results Table
+        ws.Range("O2").Value = ws.Range("I" & r).Value
+        'Insert Percent Change in Results Table
+        ws.Range("P2").Value = ws.Range("K" & r)
+        
+        'Conditonal: Precent Decreases
+        ElseIf ws.Range("K" & r).Value < ws.Range("K" & (r + 1)).Value Then
+        'Insert Ticker in Results Table in Results Table
+        ws.Range("O3").Value = ws.Range("I" & r).Value
+        'Insert Percent Change in Results Table
+        ws.Range("P3").Value = ws.Range("K" & r)
+        End If
+    Next r
+    
+    For r = 2 To LastRow
+        'Conditional: Total Stock Volume is bigger
+        If ws.Range("L" & r).Value > ws.Range("L" & (r + 1)).Value Then
+        'Insert Ticker in Results Table
+        ws.Range("O4").Value = ws.Range("I" & r).Value
+        'Insert Stock Volume in Results Table
+        ws.Range("P4").Value = ws.Range("L" & r).Value
+        Else: End If
+    
+    Next r
+Next ws
+
+End Sub
